@@ -1,7 +1,7 @@
 import { Injectable, UnauthorizedException } from "@nestjs/common";
 import { JwtService as NestJwtService } from "@nestjs/jwt";
 import { Response } from "express";
-import { IUser } from '../modules/user/interfaces/user.interface.js';
+import { IUser } from '@/modules/user/interfaces/user.interface.js';
 @Injectable()
 export class JwtService {
   constructor(private readonly jwtService: NestJwtService) {}

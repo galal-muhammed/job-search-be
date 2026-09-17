@@ -7,17 +7,17 @@ import { InjectModel } from '@nestjs/mongoose';
 import { User } from '../user/schema/user.schema.js';
 import { Model } from 'mongoose';
 import { SignUpDto } from './dto/signUp.dto.js';
-import { checkEmail } from '../../common/utils/email.util.js';
-import { checkPhone } from '../../common/utils/phone.util.js';
-import { comparePass, hashPass } from '../../common/utils/bycrpt.util.js';
+import { checkEmail } from '@/common/utils/email.util.js';
+import { checkPhone } from '@/common/utils/phone.util.js';
+import { comparePass, hashPass } from '@/common/utils/bycrpt.util.js';
 import { SignInDto } from './dto/signIn.dto.js';
 import { JwtService } from '@/modules/jwt/jwt.service.js';
-import { IUser } from '../user/interfaces/user.interface.js';
+import { IUser } from '@/modules/user/interfaces/user.interface.js';
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly jwtService: JwtService,
     @InjectModel(User.name) private userModel: Model<User>,
+    private readonly jwtService: JwtService,
   ) {}
 
   async signUp(userData: SignUpDto) {
@@ -53,15 +53,14 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
     const accessToken = await this.jwtService.generateAccessToken(user);
-    const refreshToken =
-      await this.jwtService.generateRefreshToken(user);
+    const refreshToken = await this.jwtService.generateRefreshToken(user);
     return {
       accessToken,
       refreshToken,
       user: {
         id: user._id,
         email: user.email,
-        role: user.role
+        role: user.role,
       },
     };
   }

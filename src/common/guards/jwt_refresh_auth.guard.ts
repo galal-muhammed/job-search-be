@@ -36,7 +36,7 @@ export class JwtRefreshGuard implements CanActivate {
         throw new UnauthorizedException("Access token missing");
       }
     } catch (error) {
-      if (error?.name === "UnauthorizedException") {
+      if (error instanceof Error && error.name === "UnauthorizedException") {
         // Access token is expired; try to refresh with the refresh token
         try {
           const newTokens = await this.authService.refreshTokens(refreshToken);

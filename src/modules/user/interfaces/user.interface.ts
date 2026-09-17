@@ -14,6 +14,4 @@ export interface IUser {
   mobileNumber: string;
   role: Role;
   status: Status;
-  createdAt: Date;
-  updatedAt: Date;
 }
