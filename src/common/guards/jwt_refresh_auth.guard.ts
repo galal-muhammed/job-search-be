@@ -1,0 +1,69 @@
+import {
+  CanActivate,
+  ExecutionContext,
+  Injectable,
+  UnauthorizedException,
+} from "@nestjs/common";
+import { JwtService } from "@/modules/jwt/jwt.service.js";
+import { Request, Response } from "express";
+import { AuthService } from "@/modules/auth/auth.service.js";
+
+@Injectable()
+export class JwtRefreshGuard implements CanActivate {
+  constructor(
+    private readonly jwtService: JwtService,
+    private readonly authService: AuthService,
+  ) {}
+
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const request: Request = context.switchToHttp().getRequest();
+    console.log(request.cookies);
+    const response: Response = context.switchToHttp().getResponse();
+    const accessToken = request.cookies["accessToken"];
+    const refreshToken = request.cookies["refreshToken"];
+
+    if (!refreshToken)
+      throw new UnauthorizedException("No refresh token provided");
+
+    // If access token is missing or expired, but refresh token is present, proceed to refresh token logic
+    try {
+      if (accessToken) {
+        // Verify access token
+        await this.jwtService.verifyToken(accessToken);
+        return true;
+      } else {
+        // Access token is missing; treat as expired
+        throw new UnauthorizedException("Access token missing");
+      }
+    } catch (error) {
+      if (error?.name === "UnauthorizedException") {
+        // Access token is expired; try to refresh with the refresh token
+        try {
+          const newTokens = await this.authService.refreshTokens(refreshToken);
+
+          // Set new access and refresh tokens in cookies with expiration dates
+          response.cookie("accessToken", newTokens.accessToken, {
+            httpOnly: true,
+            secure: true,
+            sameSite: "none",
+            maxAge: 604800000, // 7 days in milliseconds
+          });
+
+          response.cookie("refreshToken", newTokens.refreshToken, {
+            httpOnly: true,
+            secure: true,
+            sameSite: "none",
+            maxAge: 60 * 24 * 60 * 60 * 1000, // 2 months in milliseconds
+          });
+          // IMPORTANT: Attach the new access token to the request object, so JwtAuthGuard can read it
+          request.cookies["accessToken"] = newTokens.accessToken;
+          return true;
+        } catch (refreshError) {
+          throw refreshError;
+        }
+      } else {
+        throw new UnauthorizedException("Invalid access token");
+      }
+    }
+  }
+}

@@ -1,13 +1,24 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { UserModule } from './user/user.module.js';
+import { UserModule } from './modules/user/user.module.js';
+import { AuthModule } from './modules/auth/auth.module.js';
+import { ResponseInterceptor } from './common/Interceptors/response.interceptor.js';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { JwtService } from '@/modules/jwt/jwt.service.js';
+import { JwtModule } from '@/modules/jwt/jwt.module.js';
 
 @Module({
   imports: [
     MongooseModule.forRoot(process.env.MONGODB_URI as string),
     UserModule,
+    AuthModule,
+    JwtModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [{
+      provide: APP_INTERCEPTOR,
+      useClass: ResponseInterceptor,
+    }, 
+    JwtService,],
 })
 export class AppModule {}
