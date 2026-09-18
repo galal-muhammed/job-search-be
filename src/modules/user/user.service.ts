@@ -58,4 +58,12 @@ export class UserService {
     }
     return deleted;
   }
+
+  async findByRecoveryEmail(recoveryEmail: string) {
+    const users = await this.userModel.find({ recoveryEmail });
+    if (!users.length) {
+      throw new NotFoundException('No accounts found for this recovery email');
+    }
+    return users;
+  }
 }

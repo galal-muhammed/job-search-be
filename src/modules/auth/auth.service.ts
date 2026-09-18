@@ -3,6 +3,7 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
+import { NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from '../user/schema/user.schema.js';
 import { Model } from 'mongoose';
@@ -13,6 +14,7 @@ import { comparePass, hashPass } from '@/common/utils/bycrpt.util.js';
 import { SignInDto } from './dto/signIn.dto.js';
 import { JwtService } from '@/modules/jwt/jwt.service.js';
 import { IUser } from '@/modules/user/interfaces/user.interface.js';
+import { UpdatePasswordDto } from './dto/updatePassword.dto.js';
 @Injectable()
 export class AuthService {
   constructor(
@@ -22,14 +24,14 @@ export class AuthService {
 
   async signUp(userData: SignUpDto) {
     const emailExists = await checkEmail(userData.email, this.userModel);
-    const phoneNUmberExists = await checkPhone(
+    const phoneNumberExists = await checkPhone(
       userData.mobileNumber,
       this.userModel,
     );
     if (emailExists) {
       throw new ConflictException('Email already exists');
     }
-    if (phoneNUmberExists) {
+    if (phoneNumberExists) {
       throw new ConflictException('mobil number already exists');
     }
     const hashedPassword = await hashPass(userData.password);
@@ -44,7 +46,7 @@ export class AuthService {
         { recoveryEmail: identifier },
         { mobileNumber: identifier },
       ],
-    });
+    }).select('+password');
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
@@ -74,5 +76,19 @@ export class AuthService {
     const newRefreshToken = await this.jwtService.generateRefreshToken(data);
 
     return { accessToken: newAccessToken, refreshToken: newRefreshToken };
+  }
+
+  async updatePassword(userId: string, dto: UpdatePasswordDto) {
+    const user = await this.userModel.findById(userId).select('+password');
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    const isMatch = await comparePass(dto.oldPassword, user.password);
+    if (!isMatch) {
+      throw new UnauthorizedException('Old password is incorrect');
+    }
+    user.password = await hashPass(dto.newPassword);
+    await user.save();
+    return { message: 'Password updated successfully' };
   }
 }

@@ -20,7 +20,7 @@ export class User {
   })
   email: string;
 
-  @Prop({ required: true, type: String })
+  @Prop({ required: true, type: String, select: false })
   password: string;
 
   @Prop({ type: String, lowercase: true, trim: true })

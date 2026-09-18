@@ -1,12 +1,11 @@
 import {
   Controller,
   Get,
-  Post,
   Body,
   Patch,
-  Param,
   Delete,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { UserService } from './user.service.js';
 import { JwtAuthGuard } from '../../common/guards/jwtAuth.guard.js';
@@ -40,4 +39,19 @@ export class UserController {
   deleteOwnAccount(@CurrentUser('sub') userId: string) {
     return this.userService.remove(userId);
   }
+
+  @Get('profile')
+  @UseGuards(JwtAuthGuard)
+  @ResponseMessage('Profile retrieved successfully')
+  getProfile(@Query('userId') userId: string) {
+    return this.userService.findOne(userId);
+  }
+
+  @Get('by-recovery-email')
+  @UseGuards(JwtAuthGuard)
+  @ResponseMessage('Accounts retrieved successfully')
+  getByRecoveryEmail(@Query('recoveryEmail') recoveryEmail: string) {
+    return this.userService.findByRecoveryEmail(recoveryEmail);
+  }
+  
 }
