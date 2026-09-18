@@ -40,18 +40,18 @@ export class JwtRefreshGuard implements CanActivate {
         // Access token is expired; try to refresh with the refresh token
         try {
           const newTokens = await this.authService.refreshTokens(refreshToken);
-
+          const isProd = process.env.NODE_ENV === 'production';
           // Set new access and refresh tokens in cookies with expiration dates
           response.cookie("accessToken", newTokens.accessToken, {
             httpOnly: true,
-            secure: true,
+            secure: isProd,
             sameSite: "none",
             maxAge: 604800000, // 7 days in milliseconds
           });
 
           response.cookie("refreshToken", newTokens.refreshToken, {
             httpOnly: true,
-            secure: true,
+            secure: isProd,
             sameSite: "none",
             maxAge: 60 * 24 * 60 * 60 * 1000, // 2 months in milliseconds
           });
