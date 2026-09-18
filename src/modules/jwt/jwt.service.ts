@@ -9,7 +9,7 @@ export class JwtService {
   async generateAccessToken(info: IUser): Promise<any> {
     const id: string = info._id.toString();
     const payload: object = { sub: id, email: info.email, role: info.role };
-    return this.jwtService.sign(payload, { expiresIn: "7d" });
+    return this.jwtService.sign(payload, { expiresIn: "1h" });
   }
 
   async generateRefreshToken(info: IUser): Promise<any> {
