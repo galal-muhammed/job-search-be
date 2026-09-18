@@ -6,7 +6,9 @@ import { ResponseInterceptor } from './common/Interceptors/response.interceptor.
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { JwtService } from '@/modules/jwt/jwt.service.js';
 import { JwtModule } from '@/modules/jwt/jwt.module.js';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { CacheModule } from '@nestjs/cache-manager';
 
 @Module({
   imports: [
@@ -14,6 +16,27 @@ import { ConfigModule } from '@nestjs/config';
       isGlobal: true,
     }),
     MongooseModule.forRoot(process.env.MONGODB_URI as string),
+    MailerModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        transport: {
+          host: configService.get<string>('MAIL_HOST'),
+          port: configService.get<number>('MAIL_PORT'),
+          secure: false,
+          auth: {
+            user: configService.get<string>('MAIL_USER'),
+            pass: configService.get<string>('MAIL_PASSWORD'),
+          },
+        },
+        defaults: {
+          from: configService.get<string>('MAIL_FROM'),
+        },
+      }),
+    }),
+    CacheModule.register({
+      isGlobal: true,
+    }),
     UserModule,
     AuthModule,
     JwtModule,

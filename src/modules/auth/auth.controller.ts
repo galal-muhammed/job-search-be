@@ -8,6 +8,9 @@ import { JwtService } from '../jwt/jwt.service.js';
 import { JwtAuthGuard } from '../../common/guards/jwtAuth.guard.js';
 import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
 import { UpdatePasswordDto } from './dto/updatePassword.dto.js';
+import { ForgotPasswordDto } from './dto/forgetPassword.dto.js';
+import { VerifyOtpDto } from './dto/verifyOtp.dto.js';
+import { ResetPassDto } from './dto/resetPassword.dto.js';
 
 @Controller('auth')
 export class AuthController {
@@ -43,5 +46,25 @@ export class AuthController {
     @Body() dto: UpdatePasswordDto,
   ) {
     return this.authService.updatePassword(userId, dto);
+  }
+
+  @Post('forgot-password')
+  async forgotPassword(@Body() dto: ForgotPasswordDto) {
+    return this.authService.forgotPassword(dto.email);
+  }
+  @Post('verify-otp')
+  async verifyOtp(@Body() dto: VerifyOtpDto) {
+    return this.authService.verifyResetOtp(dto.email, dto.otp);
+  }
+  @Post('password-reset')
+  @ResponseMessage('Password reset successfully')
+  async resetPassword(@Body() resetPasswordDto: ResetPassDto): Promise<string> {
+    try {
+      await this.authService.isOtpVerified(resetPasswordDto.email);
+      await this.authService.resetPassword(resetPasswordDto);
+      return 'Password reset successfully';
+    } catch (err) {
+      throw err;
+    }
   }
 }
