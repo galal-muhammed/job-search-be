@@ -100,70 +100,28 @@ export class AuthService {
     }
     user.password = await hashPass(dto.newPassword);
     await user.save();
-    return { message: 'Password updated successfully' };
   }
 
-  // async forgotPassword(email: string) {
-  //   const user = await this.userModel.findOne({ email });
-
-  //   if (!user) {
-  //     throw new NotFoundException('User not found');
-  //   }
-
-  //   const otp = generateOtp();
-  //   await this.cacheManager.set(`password-reset-otp:${email}`, otp);
-  //   await this.emailService.sendOtpEmail(email, otp);
-
-  //   return { message: 'OTP sent to your email' };
-  // }
-
   async forgotPassword(email: string) {
-    console.log('1. forgotPassword called');
-
     const user = await this.userModel.findOne({ email });
-
-    if (!user) {
-      throw new NotFoundException('User not found');
+    if (user) {
+      const otp = generateOtp();
+      await this.cacheManager.set(`password-reset-otp:${email}`, otp, 300000);
+      await this.emailService.sendOtpEmail(email, otp);
     }
-
-    console.log('2. User found');
-
-    const otp = generateOtp();
-
-    console.log('3. OTP generated:', otp);
-
-    await this.cacheManager.set(`password-reset-otp:${email}`, otp, 300000);
-
-    console.log('4. OTP cached');
-
-    await this.emailService.sendOtpEmail(email, otp);
-
-    console.log('5. Email service finished');
-
-    return {
-      message: 'OTP sent to your email',
-    };
   }
   async verifyResetOtp(email: string, otp: string) {
     const storedOtp = await this.cacheManager.get(
       `password-reset-otp:${email}`,
     );
-
     if (!storedOtp) {
       throw new BadRequestException('OTP expired or not found');
     }
-
     if (storedOtp !== otp) {
       throw new BadRequestException('Invalid OTP');
     }
-    await this.cacheManager.set(
-      `otp-verified-${email}`,
-      true,
-      10 * 60 * 1000, // 10 minutes
-    );
-    return {
-      message: 'OTP verified',
-    };
+    await this.cacheManager.del(`password-reset-otp:${email}`);
+    await this.cacheManager.set(`otp-verified-${email}`, true, 10 * 60 * 1000);
   }
   async isOtpVerified(email: string): Promise<void> {
     const isVerified = await this.cacheManager.get(`otp-verified-${email}`);

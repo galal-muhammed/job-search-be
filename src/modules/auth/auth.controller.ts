@@ -23,7 +23,9 @@ export class AuthController {
   signUp(@Body() userData: SignUpDto) {
     return this.authService.signUp(userData);
   }
+
   @Post('signin')
+  @ResponseMessage('Signed in successfully')
   async signIn(
     @Body() userData: SignInDto,
     @Res({ passthrough: true }) res: Response,
@@ -49,22 +51,21 @@ export class AuthController {
   }
 
   @Post('forgot-password')
+  @ResponseMessage('OTP sent to your email')
   async forgotPassword(@Body() dto: ForgotPasswordDto) {
     return this.authService.forgotPassword(dto.email);
   }
+
   @Post('verify-otp')
+  @ResponseMessage('OTP verified successfully')
   async verifyOtp(@Body() dto: VerifyOtpDto) {
     return this.authService.verifyResetOtp(dto.email, dto.otp);
   }
+
   @Post('password-reset')
   @ResponseMessage('Password reset successfully')
-  async resetPassword(@Body() resetPasswordDto: ResetPassDto): Promise<string> {
-    try {
-      await this.authService.isOtpVerified(resetPasswordDto.email);
-      await this.authService.resetPassword(resetPasswordDto);
-      return 'Password reset successfully';
-    } catch (err) {
-      throw err;
-    }
+  async resetPassword(@Body() resetPasswordDto: ResetPassDto) {
+    await this.authService.isOtpVerified(resetPasswordDto.email);
+    await this.authService.resetPassword(resetPasswordDto);
   }
 }

@@ -11,7 +11,6 @@ export class EmailService {
   ) {}
 
   async sendOtpEmail(to: string, otpCode: string) {
-     console.log('EMAIL SERVICE CALLED');
     try {
       const info =await this.mailerService.sendMail({
         to,
@@ -44,7 +43,6 @@ export class EmailService {
           </div>
         `,
       });
-      console.log('EMAIL INFO:', info);
       // await this.cacheManager.set(`pass-${to}`, otpCode);
     } catch (error) {
       console.error('Error sending email:', error);

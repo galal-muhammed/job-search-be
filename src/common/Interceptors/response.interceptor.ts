@@ -21,7 +21,6 @@ export class ResponseInterceptor<T> implements NestInterceptor<T, Response<T>> {
     return next.handle().pipe(
       map((data) => {
         const statusCode = response.statusCode;
-        // console.log(statusCode);
         if (statusCode >= 200 && statusCode < 300) {
           return {
             statusCode: statusCode,

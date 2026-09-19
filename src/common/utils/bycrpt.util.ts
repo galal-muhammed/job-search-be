@@ -15,7 +15,6 @@ export const comparePass = async (
 ): Promise<boolean> => {
   const isMatch = await bcrypt.compare(password, hashPassword);
   if (!isMatch) {
-    console.log(HttpStatus.UNAUTHORIZED);
     throw new UnauthorizedException("Invalid email or password");
   }
   return true; // Explicitly return true/false based on comparison

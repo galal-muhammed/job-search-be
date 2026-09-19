@@ -17,7 +17,6 @@ export class JwtRefreshGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request: Request = context.switchToHttp().getRequest();
-    console.log(request.cookies);
     const response: Response = context.switchToHttp().getResponse();
     const accessToken = request.cookies["accessToken"];
     const refreshToken = request.cookies["refreshToken"];
