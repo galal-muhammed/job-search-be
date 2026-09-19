@@ -1,4 +1,4 @@
-import { Body, Controller, Patch, Post, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Patch, Post, Res, UseGuards } from '@nestjs/common';
 import type { Response } from 'express';
 import { AuthService } from './auth.service.js';
 import { SignUpDto } from './dto/signUp.dto.js';
@@ -25,6 +25,7 @@ export class AuthController {
   }
 
   @Post('signin')
+  @HttpCode(HttpStatus.OK)
   @ResponseMessage('Signed in successfully')
   async signIn(
     @Body() userData: SignInDto,
@@ -51,18 +52,21 @@ export class AuthController {
   }
 
   @Post('forgot-password')
+  @HttpCode(HttpStatus.OK)
   @ResponseMessage('OTP sent to your email')
   async forgotPassword(@Body() dto: ForgotPasswordDto) {
     return this.authService.forgotPassword(dto.email);
   }
 
   @Post('verify-otp')
+  @HttpCode(HttpStatus.OK)
   @ResponseMessage('OTP verified successfully')
   async verifyOtp(@Body() dto: VerifyOtpDto) {
     return this.authService.verifyResetOtp(dto.email, dto.otp);
   }
 
   @Post('password-reset')
+  @HttpCode(HttpStatus.OK)
   @ResponseMessage('Password reset successfully')
   async resetPassword(@Body() resetPasswordDto: ResetPassDto) {
     await this.authService.isOtpVerified(resetPasswordDto.email);

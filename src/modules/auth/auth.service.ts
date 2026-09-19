@@ -44,9 +44,15 @@ export class AuthService {
       throw new ConflictException('mobil number already exists');
     }
     const hashedPassword = await hashPass(userData.password);
-    return this.userModel.create({ ...userData, password: hashedPassword });
+    const user = await this.userModel.create({
+      ...userData,
+      password: hashedPassword,
+    });
+    const { password, ...userWithoutPassword } = user.toObject();
+    return userWithoutPassword;
   }
 
+  
   async signIn(userData: SignInDto) {
     const { identifier, password } = userData;
     const user = await this.userModel

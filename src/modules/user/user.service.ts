@@ -66,4 +66,13 @@ export class UserService {
     }
     return users;
   }
+  async getPublicProfile(id: string) {
+    const user = await this.userModel
+      .findById(id)
+      .select('firstName lastName userName role status DOB');
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
+  }
 }
