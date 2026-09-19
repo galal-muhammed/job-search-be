@@ -9,6 +9,8 @@ import { JwtModule } from '@/modules/jwt/jwt.module.js';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { CacheModule } from '@nestjs/cache-manager';
+import { CompanyModule } from './modules/company/company.module.js';
+import { JobModule } from './modules/job/job.module.js';
 
 @Module({
   imports: [
@@ -40,6 +42,8 @@ import { CacheModule } from '@nestjs/cache-manager';
     UserModule,
     AuthModule,
     JwtModule,
+    CompanyModule,
+    JobModule,
   ],
   controllers: [],
   providers: [
